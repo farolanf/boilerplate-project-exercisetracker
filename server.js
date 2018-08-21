@@ -20,6 +20,10 @@ app.use(express.static('public'))
 
 // API
 
+function isDate(str) {
+  return !!str && /^\s*\d{4}-\d{2}-\d{2}\s*$/.test(str)
+}
+
 app.post('/api/exercise/new-user', (req, res) => {
   if (!req.body.username || req.body.username.trim() === '') {
     return res.sendStatus(400)
@@ -35,7 +39,7 @@ app.post('/api/exercise/add', (req, res) => {
     (!req.body.userId || req.body.userId.trim() === '') ||
     (!req.body.description || req.body.description.trim() === '') ||
     (!req.body.duration || req.body.duration.trim() === '' || req.body.duration.trim() == 0) ||
-    (!req.body.date || !/^\s*\d{4}-\d{2}-\d{2}\s*$/.test(req.body.date))
+    (!req.body.date || !isDate(req.body.date))
   ) {
     return res.sendStatus(400)
   }
@@ -49,13 +53,20 @@ app.post('/api/exercise/add', (req, res) => {
       date: new Date(req.body.date.trim())
     }, (err, data) => {
       if (err) res.sendStatus(500)
-      res.json({
-        _id: data._id,
-        username: user.username,
-        description: data.description,
-        duration: data.duration,
-        date: data.date.toDateString()
-      })
+      res.json(_.pick(data, ['_id', 'userId', 'description', 'duration', 'date']))
+    })
+  })
+})
+
+app.get('/api/exercise/log', (req, res) => {
+  if (!req.body.userId || req.body.userId.trim() === '') return res.sendStatus(400)
+  User.findById(req.body.userId, (err, user) => {
+    if (err) return res.sendStatus(404)
+    const query = {}
+    const from = new Date(req.body.from)
+    const to = new Date(req.body.to)
+    Exercise.find(query, (err, log) => {
+      
     })
   })
 })
