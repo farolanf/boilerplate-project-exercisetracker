@@ -60,6 +60,7 @@ app.post('/api/exercise/add', (req, res) => {
 
 app.get('/api/exercise/log', (req, res) => {
   if (!req.query.userId || req.query.userId.trim() === '') return res.sendStatus(400)
+  
   User.findById(req.query.userId, (err, user) => {
     if (err) return res.sendStatus(500)
     if (!user) return res.sendStatus(404)
@@ -84,11 +85,16 @@ app.get('/api/exercise/log', (req, res) => {
     
     q.exec((err, exercises) => {
       if (err) return res.status(500).send(err)
+      
       res.json({
         _id: user._id,
         username: user.username,
         count: exercises.length,
-        log: exercises.map(e => _.pick(e, ['description', 'duration', 'date']))
+        log: exercises.map(e => {
+          const obj =_.pick(e, ['description', 'duration'])
+          obj.date = e.date.toDateString()
+          return obj
+        })
       })
     })
   })
