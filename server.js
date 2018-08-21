@@ -3,6 +3,7 @@ const app = express()
 const bodyParser = require('body-parser')
 
 const cors = require('cors')
+const _ = require('lodash')
 
 const { User, Exercise } = require('./models')
 
@@ -16,6 +17,30 @@ app.use(bodyParser.json())
 
 
 app.use(express.static('public'))
+
+// API
+
+app.post('/api/exercise/new-user', (req, res) => {
+  if (!req.body.username || req.body.username.trim() === '') {
+    return res.sendStatus(400)
+  }
+  User.create({ username: req.body.username }, (err, user) => {
+    if (err) res.sendStatus(500)
+    res.json(_.pick(user, ['_id', 'username']))
+  })
+})
+
+app.post('/api/exercise/add', (req, res) => {
+  if (
+    (!req.body.userId || req.body.userId.trim() === '') ||
+    (!req.body.description || req.body.description.trim() === '') ||
+    req.body.duration == 0 ||
+    (!req.body.date || !/\d{4}-\d{2}-\d{2}/.test(req.body.date))
+  ) {
+    return res.sendStatus(400)
+  }
+})
+
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
@@ -43,18 +68,6 @@ app.use((err, req, res, next) => {
   }
   res.status(errCode).type('txt')
     .send(errMessage)
-})
-
-// API
-
-app.post('/api/exercise/new-user', (req, res) => {
-  if (!req.body.username || req.body.username.trim() === '') {
-    return res.sendStatus(400)
-  }
-  User.create({ username: req.body.username }, (err, user) => {
-    if (err) res.sendStatus(500)
-    res.json(user)
-  })
 })
 
 const listener = app.listen(process.env.PORT || 3000, () => {
