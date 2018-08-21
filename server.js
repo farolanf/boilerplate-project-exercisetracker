@@ -39,7 +39,25 @@ app.post('/api/exercise/add', (req, res) => {
   ) {
     return res.sendStatus(400)
   }
-  
+  User.findOne({ _id: req.body.userId }, (err, user) => {
+    if (err) return res.sendStatus(500)
+
+    Exercise.create({
+      userId: user._id,
+      description: req.body.description.trim(),
+      duration: parseInt(req.body.duration.trim()),
+      date: new Date(req.body.date.trim())
+    }, (err, data) => {
+      if (err) res.sendStatus(500)
+      res.json({
+        _id: data._id,
+        username: user.username,
+        description: data.description,
+        duration: data.duration,
+        date: data.date.toDateString()
+      })
+    })
+  })
 })
 
 app.get('/', (req, res) => {
