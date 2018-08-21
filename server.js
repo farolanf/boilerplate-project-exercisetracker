@@ -47,7 +47,15 @@ app.use((err, req, res, next) => {
 
 // API
 
-
+app.post('/api/exercise/new-user', (req, res) => {
+  if (!req.body.username || req.body.username.trim() === '') {
+    return res.sendStatus(400)
+  }
+  User.create({ username: req.body.username }, (err, user) => {
+    if (err) res.sendStatus(500)
+    res.json(user)
+  })
+})
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)

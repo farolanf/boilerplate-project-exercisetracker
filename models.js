@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema)
 
 const exerciseSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
   description: { type: String, required: true },
   duration: { type: Number, required: true },
   date: { type: Date, required: true }
