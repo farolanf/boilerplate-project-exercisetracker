@@ -59,35 +59,36 @@ app.post('/api/exercise/add', (req, res) => {
 })
 
 app.get('/api/exercise/log', (req, res) => {
-  if (!req.body.userId || req.body.userId.trim() === '') return res.sendStatus(400)
-  User.findById(req.body.userId, (err, user) => {
+  if (!req.query.userId || req.query.userId.trim() === '') return res.sendStatus(400)
+  User.findById(req.query.userId, (err, user) => {
     if (err) return res.sendStatus(500)
     if (!user) return res.sendStatus(404)
     
-    const from = isDate(req.body.from) && new Date(req.body.from)
-    const to = isDate(req.body.to) && new Date(req.body.to)
-    const query = { date: {} }
+    const from = isDate(req.query.from) && new Date(req.query.from)
+    const to = isDate(req.query.to) && new Date(req.query.to)
+    const query = {}
     
     if (from) {
-      query.date.$gte = from
+      query.date = { $gte: from }
     }
     if (to) {
+      query.date = {}
       query.date.$lte = to
     }
-    
+
     let q = Exercise.find(query)
     
-    if (req.body.limit) {
-      q = q.limit(parseInt(req.body.limit))
+    if (req.query.limit) {
+      q = q.limit(parseInt(req.query.limit))
     }
     
     q.exec((err, exercises) => {
-      if (err) return res.sendStatus(500)
+      if (err) return res.status(500).send(err)
       res.json({
         _id: user._id,
         username: user.username,
         count: exercises.length,
-        log: exercises
+        log: exercises.map(e => _.pick(e, ['description', 'duration', 'date']))
       })
     })
   })
