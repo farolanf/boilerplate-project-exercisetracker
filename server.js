@@ -4,6 +4,8 @@ const bodyParser = require('body-parser')
 
 const cors = require('cors')
 
+const { User, Exercise } = require('./models')
+
 const mongoose = require('mongoose')
 mongoose.connect(process.env.MONGO_URI)
 
