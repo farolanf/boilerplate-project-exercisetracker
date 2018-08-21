@@ -34,11 +34,12 @@ app.post('/api/exercise/add', (req, res) => {
   if (
     (!req.body.userId || req.body.userId.trim() === '') ||
     (!req.body.description || req.body.description.trim() === '') ||
-    req.body.duration == 0 ||
-    (!req.body.date || !/\d{4}-\d{2}-\d{2}/.test(req.body.date))
+    (!req.body.duration || req.body.duration.trim() === '' || req.body.duration.trim() == 0) ||
+    (!req.body.date || !/^\s*\d{4}-\d{2}-\d{2}\s*$/.test(req.body.date))
   ) {
     return res.sendStatus(400)
   }
+  
 })
 
 app.get('/', (req, res) => {
