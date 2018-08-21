@@ -61,12 +61,34 @@ app.post('/api/exercise/add', (req, res) => {
 app.get('/api/exercise/log', (req, res) => {
   if (!req.body.userId || req.body.userId.trim() === '') return res.sendStatus(400)
   User.findById(req.body.userId, (err, user) => {
-    if (err) return res.sendStatus(404)
-    const query = {}
-    const from = new Date(req.body.from)
-    const to = new Date(req.body.to)
-    Exercise.find(query, (err, log) => {
-      
+    if (err) return res.sendStatus(500)
+    if (!user) return res.sendStatus(404)
+    
+    const from = isDate(req.body.from) && new Date(req.body.from)
+    const to = isDate(req.body.to) && new Date(req.body.to)
+    const query = { date: {} }
+    
+    if (from) {
+      query.date.$gte = from
+    }
+    if (to) {
+      query.date.$lte = to
+    }
+    
+    let q = Exercise.find(query)
+    
+    if (req.body.limit) {
+      q = q.limit(parseInt(req.body.limit))
+    }
+    
+    q.exec((err, exercises) => {
+      if (err) return res.sendStatus(500)
+      res.json({
+        _id: user._id,
+        username: user.username,
+        count: exercises.length,
+        log: exercises
+      })
     })
   })
 })
